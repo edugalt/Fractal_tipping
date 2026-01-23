@@ -791,7 +791,7 @@ def find_numeric_label_ls(val_space:list, val_fixed: float,
     return labels
 
 '''
-Plot heat map of fractal branch cut with input data labels. 0 - tipping to infinity (green); 1 - converge (pink)
+Plot panels of fractal branch cut with input data labels. 0 - tipping to infinity (green); 1 - converge (pink)
 Input:
     labels: (list or array) The label values. 0 - converge; 1 - tip to infinity
     val_min, val_max: (float) the range limit of the free parameter
@@ -800,7 +800,6 @@ Output:
     fig, ax : Figure and Axes objects
 '''
 def plot_frac_bar(labels, val_min, val_max, ax=None):
-    # cmap = ListedColormap(['orange', 'darkseagreen', 'mistyrose'])
     cmap = ListedColormap(['orange', 'yellow', 'blue'])
     # cmap = ListedColormap(['whitesmoke', 'whitesmoke', 'whitesmoke'])
 
@@ -1478,3 +1477,84 @@ def uncertainty_exponent(s_type, TARGET_UNCERTAIN_POINTS=150, K=40,
     # )
     
     return f_eps_ls, used_eps
+
+
+'''
+Given fixed point (x_f, y_f) and its basin catefory, plot basin of attraction and the fixed point itself
+Input:
+    basin: (data frame) basin labels from the .csv file
+    x_f, y_f: (float) fixed point corresponding to (a_f, b_f)
+    x_initial_ls, y_initial_ls: (array) initial conditions in the space
+    highlight_region: (tuple of tuples) used to draw a highlighted frame to indicate zoom-in section if needed; default None
+    xlim, ylim: (tuple of two floats) the region to focus
+    save_path: (str) path to save the figure
+'''
+def plot_fixed_point_basin(basin, x_f, y_f, x_initial_ls, y_initial_ls, 
+                           highlight_region=None, xlim=(0, 0), ylim=(0, 0), save_path=None):
+
+    # Define custom colors
+    cmap = ListedColormap(['yellow', 'blue'])  # 0 -> yellow, 1 -> blue (inside basin)
+
+    plt.figure(figsize=(6, 6))
+    plt.imshow(basin, cmap=cmap, origin='lower',
+               extent=[x_initial_ls.min(), x_initial_ls.max(), 
+                       y_initial_ls.min(), y_initial_ls.max()])
+
+    
+    # fixed point
+    plt.plot([x_f], [y_f],
+         marker='s',
+         linestyle='None',
+         color='red',
+         markersize=15,
+         markeredgewidth=4,
+         label='Fixed point')
+    
+    # # (OPTIONAL) zoom in box
+    # if highlight_region is not None:
+    #     (x_min, x_max), (y_min, y_max) = highlight_region
+    #     rect = Rectangle(
+    #         (x_min, y_min),
+    #         x_max - x_min,
+    #         y_max - y_min,
+    #         linewidth=0.8,
+    #         edgecolor='red',
+    #         facecolor='none',
+    #         linestyle='-'
+    #     )
+    #     plt.gca().add_patch(rect)
+     
+    # xlim, ylim
+    if not (xlim[0] == 0 and xlim[1] == 0):
+        plt.xlim(xlim)
+    if not (ylim[0] == 0 and ylim[1] == 0):
+        plt.ylim(ylim)
+
+    # legend
+    # legend_handles = [
+    #     Patch(facecolor='blue', edgecolor='grey', label='Basin of attraction'),
+    #     Line2D([0], [0],
+    #                marker='x',
+    #                linestyle='None',
+    #                color='red',
+    #                markersize=5.5,
+    #                markeredgewidth=1,
+    #                label='Fixed point')
+    # ]
+    
+    plt.xlabel(r'$x_0$', fontsize=22)
+    plt.ylabel(r'$y_0$', fontsize=22)
+    plt.gca().tick_params(labelsize=20)
+
+    # plt.title('Basin of Attraction')
+    # leg = plt.legend(handles=legend_handles, loc='upper left', frameon=True)
+    # frame = leg.get_frame()
+    # frame.set_facecolor("whitesmoke")   # same background
+    # frame.set_edgecolor("grey")         # same border color
+    # frame.set_linewidth(0.8)            # same border thickness
+    # frame.set_alpha(1.0)                # fully opaque   
+    # plt.grid(True)
+    plt.show()
+
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
